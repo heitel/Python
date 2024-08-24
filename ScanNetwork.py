@@ -46,7 +46,7 @@ def sniff_icmpv6_responses(iface, timeout=10):
             erg[packet[Ether].src] = packet[IPv6].src
             #print(f"Antwort von: {packet[IPv6].src} {packet[Ether].src}")
 
-    return erg;
+    return erg
 
 def send_icmpv6_multicast(iface):
     # Erstelle ein ICMPv6 Echo Request Paket (Ping)
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     devices = scan_network(network_range)
 
     # Netzwerk-Interface, über das das Paket gesendet wird
-    interface = "en0"
+    interface = "WLAN"
     # Sende das ICMPv6 Echo Request Paket
     send_icmpv6_multicast(interface)
     # Sniffe die ICMPv6-Antworten
