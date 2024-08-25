@@ -63,7 +63,10 @@ if __name__ == "__main__":
     devices = scan_network(network_range)
 
     # Netzwerk-Interface, über das das Paket gesendet wird
-    interface = "WLAN"
+    # win
+    # interface = "WLAN"
+    # macos
+    interface = "en0"
     # Sende das ICMPv6 Echo Request Paket
     send_icmpv6_multicast(interface)
     # Sniffe die ICMPv6-Antworten
