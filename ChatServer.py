@@ -26,7 +26,8 @@ class ChatServer:
 
 ####################################################################
 if __name__ == "__main__":
-    host = "2a02:8071:a86:75c0:400:d575:ed68:c4b0"
+    #host = "2a02:8071:a86:75c0:400:d575:ed68:c4b0"
+    host = "fe80::db9d:aa5d:f274:9349%5"
     port = 65432
     server = ChatServer(host, port)
     server.work()
