@@ -8,8 +8,8 @@ import ChatClientHelper
 class ChatClient:
     def __init__(self, name, host, port):
         self.name = name
-        self.HOST = host  # The server's hostname or IP address
-        self.PORT = port  # The port used by the server
+        self.HOST = host
+        self.PORT = port
 
     def work(self):
         if ":" in self.HOST:
