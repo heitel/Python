@@ -10,9 +10,10 @@ class ChatClientHelper(threading.Thread):
 
     def run(self):
         while True:
-            print(f"{self.name}: ", end="")
+           # print(f"{self.name}: ", end="")
             ch = input()
-            data = self.name + ": " + ch
-            self.socket.sendall(data.encode())
-            if ch[0] == "q":
-                sys.exit()
+            if len(ch) != 0:
+                data = self.name + ": " + ch
+                self.socket.sendall(data.encode())
+                if ch[0] == "q":
+                    sys.exit()

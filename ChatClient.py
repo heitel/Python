@@ -1,5 +1,4 @@
 import socket
-
 import ChatClientHelper
 
 
@@ -22,9 +21,6 @@ class ChatClient:
             if not data:
                 break
             print(f"\n{data.decode()}")
-
-
-
 
 
 if __name__ == "__main__":

@@ -2,7 +2,6 @@ import sys
 import threading
 
 
-
 class ChatWorker(threading.Thread):
     def __init__(self, server, socket, addr):
         super().__init__(daemon=True)
@@ -21,8 +20,8 @@ class ChatWorker(threading.Thread):
                 text = data.decode()
                 print(text)
                 pos = text.find(":")
-                clients = self.server.getClients()
                 posQ = text.find("q")
+                clients = self.server.getClients()
 
                 if pos + 2 == posQ:
                     print("Ende")
@@ -30,8 +29,9 @@ class ChatWorker(threading.Thread):
                         if clients[i][0] == self.socket:
                             clients.remove(clients[i])
                             self.socket.close()
+                            break
                     break
 
                 for c in clients:
-                    #if c[0] != self.socket:
-                    c[0].sendall(data)
+                    if c[0] != self.socket:
+                        c[0].sendall(data)
