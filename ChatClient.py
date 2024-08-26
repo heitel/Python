@@ -2,6 +2,15 @@ import socket
 import ChatClientHelper
 
 
+def represents_int(s):
+    try:
+        int(s)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
 class ChatClient:
     def __init__(self, name, host, port):
         self.name = name
@@ -16,7 +25,10 @@ class ChatClient:
             if len(part) == 1:
                 s.connect((self.HOST, self.PORT))
             else:
-                scope_id = socket.if_nametoindex(part[1])
+                if represents_int(part[1]):
+                    scope_id = 0
+                else:
+                    scope_id = socket.if_nametoindex(part[1])
                 s.connect((self.HOST, self.PORT, 0, scope_id))
         else:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

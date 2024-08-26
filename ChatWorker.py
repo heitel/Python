@@ -1,3 +1,4 @@
+import socket
 import sys
 import threading
 
@@ -8,11 +9,10 @@ class ChatWorker(threading.Thread):
         self.server = server
         self.socket = socket
         self.addr = addr
-        print(f"Socket: {self.socket} Address: {self.addr}")
 
     def run(self):
         with self.socket:
-            print(f"Connected by {self.addr}")
+         #   print(f"Connected by {self.addr[0]}")
             while True:
                 data = self.socket.recv(1024)
                 if not data:

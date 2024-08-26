@@ -18,7 +18,8 @@ class ChatServer:
             worker = ChatWorker(self, acc[0], acc[1])
             worker.start()
             self.clients.append(acc)
-            print(self.clients)
+            for c in self.clients:
+                print(c[1])
 
     def getClients(self):
         return self.clients
@@ -27,7 +28,7 @@ class ChatServer:
 ####################################################################
 if __name__ == "__main__":
     #host = "2a02:8071:a86:75c0:400:d575:ed68:c4b0"
-    host = "fe80::db9d:aa5d:f274:9349%5"
+    host = "::1"
     port = 65432
     server = ChatServer(host, port)
     server.work()
