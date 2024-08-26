@@ -1,6 +1,4 @@
-import curses
 import socket
-import sys
 
 import ChatClientHelper
 
