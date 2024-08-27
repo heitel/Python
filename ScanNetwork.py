@@ -3,6 +3,7 @@ logging.getLogger("scapy").setLevel(logging.CRITICAL)
 
 from scapy.all import *
 from scapy.layers.inet6 import *
+from scapy.layers.l2 import ARP
 import netifaces
 
 
@@ -16,45 +17,34 @@ def reverse_dns_lookup(ip_address):
 
 
 def scan_network(network_range):
-    # Erstellen eines ARP-Anfrage-Pakets
     arp_request = ARP(pdst=network_range)
-    # Erstellen eines Ethernet-Frames, um die ARP-Anfrage zu senden
     ether = Ether(dst="ff:ff:ff:ff:ff:ff")
-    # Kombinieren des Ethernet-Frames und der ARP-Anfrage
     packet = ether / arp_request
+    result = srp(packet, timeout=10, verbose=0)[0]
 
-    # Senden des Pakets und Empfangen der Antworten
-    result = srp(packet, timeout=3, verbose=0)[0]
-
-    # Leere Liste für die Geräte im Netzwerk
     devices = []
-
     # Verarbeitung der erhaltenen Antworten
     for sent, received in result:
-        # IP- und MAC-Adresse der Antwort hinzufügen
         devices.append({'ip': received.psrc, 'mac': received.hwsrc})
 
-    print(f"Gefunden :{len(devices)}")
+    print(f"Gefunden: {len(devices)}", flush=True)
     return devices
 
 def sniff_icmpv6_responses(iface, timeout=10):
     # Sniff IPv6-Pakete auf dem Interface
-    packets = sniff(iface=iface, timeout=timeout, promisc=True, count=1000)
+    packets = sniff(filter="icmp6", iface=iface, timeout=timeout, promisc=True)
 
     erg = dict()
-    # Zeige alle empfangenen ICMPv6-Pakete an
     for packet in packets:
-        if ICMPv6EchoReply in packet:
-            erg[packet[Ether].src] = packet[IPv6].src
+        erg[packet[Ether].src] = packet[IPv6].src
             #print(f"Antwort von: {packet[IPv6].src} {packet[Ether].src}")
 
     return erg
 
 def send_icmpv6_multicast(iface):
-    # Erstelle ein ICMPv6 Echo Request Paket (Ping)
-    icmpv6_request = IPv6(dst="ff02::1") / ICMPv6EchoRequest()
-    # Sende das ICMPv6 Echo Request Paket
-    send(icmpv6_request, iface=iface, verbose=False)
+    for i in range(1):
+        icmpv6_request = IPv6(dst="ff02::1") / ICMPv6EchoRequest(seq=i)
+        send(icmpv6_request, iface=iface, verbose=False)
 
 
 if __name__ == "__main__":
@@ -71,8 +61,11 @@ if __name__ == "__main__":
         for addr in addrs.get(netifaces.AF_INET6, []):
             scope_id = socket.if_nametoindex(iface)
             print('%i %-8s %s' % (scope_id, iface, addr['addr']))
-
-    print("Start scanning..................")
+    print("Welches Interface soll gescannt werden? ", end="")
+    interface = input()
+    if interface == "":
+        interface = "enp0s1"
+    print("Start scanning..................", flush=True)
     # Netzwerkrange, die gescannt werden soll, z.B. "192.168.0.0/24"
     network_range = "192.168.0.0/24"
     devices = scan_network(network_range)
@@ -81,10 +74,8 @@ if __name__ == "__main__":
     # win
     # interface = "WLAN"
     # macos
-    interface = "en0"
-    # Sende das ICMPv6 Echo Request Paket
+    # interface = "enp0s1"
     send_icmpv6_multicast(interface)
-    # Sniffe die ICMPv6-Antworten
     erg = sniff_icmpv6_responses(interface)
 
     # Ausgabe der gefundenen Geräte
