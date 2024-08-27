@@ -52,19 +52,18 @@ if __name__ == "__main__":
     for iface in netifaces.interfaces():
         addrs = netifaces.ifaddresses(iface)
         for addr in addrs.get(netifaces.AF_INET, []):
-            scope_id = socket.if_nametoindex(iface)
-            print('%i %-8s %s' % (scope_id, iface, addr['addr']))
+            print('%-8s %s' % ( iface, addr['addr']))
 
     print("IPv6 Interfaces *****************************")
     for iface in netifaces.interfaces():
         addrs = netifaces.ifaddresses(iface)
         for addr in addrs.get(netifaces.AF_INET6, []):
-            scope_id = socket.if_nametoindex(iface)
-            print('%i %-8s %s' % (scope_id, iface, addr['addr']))
+            print('%-8s %s' % (iface, addr['addr']))
     print("Welches Interface soll gescannt werden? ", end="")
     interface = input()
     if interface == "":
         interface = "enp0s1"
+
     print("Start scanning..................", flush=True)
     # Netzwerkrange, die gescannt werden soll, z.B. "192.168.0.0/24"
     network_range = "192.168.0.0/24"
