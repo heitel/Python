@@ -4,7 +4,6 @@ logging.getLogger("scapy").setLevel(logging.CRITICAL)
 from scapy.all import *
 from scapy.layers.inet6 import *
 from scapy.layers.l2 import ARP
-import netifaces
 
 
 def reverse_dns_lookup(ip_address):
@@ -27,12 +26,13 @@ def scan_network(network_range):
     for sent, received in result:
         devices.append({'ip': received.psrc, 'mac': received.hwsrc})
 
-    print(f"Gefunden: {len(devices)}", flush=True)
+    print(f"Gefunden: {len(devices)} IPv4 Devices", flush=True)
     return devices
 
 def sniff_icmpv6_responses(iface, timeout=10):
     # Sniff IPv6-Pakete auf dem Interface
-    packets = sniff(filter="icmp6", iface=iface, timeout=timeout, promisc=True)
+    # ICMPv6 Request and Reply
+    packets = sniff(filter="icmp6 and (ip6[40] == 128 or ip6[40] == 129)", iface=iface, timeout=timeout, promisc=True)
 
     erg = dict()
     for packet in packets:
@@ -48,23 +48,9 @@ def send_icmpv6_multicast(iface):
 
 
 if __name__ == "__main__":
-    print("IPv4 Interfaces *****************************")
-    for iface in netifaces.interfaces():
-        addrs = netifaces.ifaddresses(iface)
-        for addr in addrs.get(netifaces.AF_INET, []):
-            print('%-8s %s' % ( iface, addr['addr']))
-
-    print("IPv6 Interfaces *****************************")
-    for iface in netifaces.interfaces():
-        addrs = netifaces.ifaddresses(iface)
-        for addr in addrs.get(netifaces.AF_INET6, []):
-            print('%-8s %s' % (iface, addr['addr']))
-    print("Welches Interface soll gescannt werden? ", end="")
-    interface = input()
-    if interface == "":
-        interface = "enp0s1"
-
-    print("Start scanning..................", flush=True)
+    conf.use_pcap = True
+    interface = conf.iface
+    print(f"Start scanning {interface}..................", flush=True)
     # Netzwerkrange, die gescannt werden soll, z.B. "192.168.0.0/24"
     network_range = "192.168.0.0/24"
     devices = scan_network(network_range)
