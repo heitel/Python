@@ -1,9 +1,12 @@
 import logging
+
+import netifaces
+
 logging.getLogger("scapy").setLevel(logging.CRITICAL)
 
 from scapy.all import *
 from scapy.layers.inet6 import *
-from scapy.layers.l2 import ARP
+from scapy.layers.l2 import ARP, arping
 
 
 def reverse_dns_lookup(ip_address):
@@ -14,8 +17,21 @@ def reverse_dns_lookup(ip_address):
     except socket.herror:
         return None
 
-
 def scan_network(network_range):
+    t = AsyncSniffer(filter="arp and arp[7]==2", timeout=10)
+    t.start()
+    ans = arping("10.192.0.0/19", cache=False, verbose=1, timeout=10)[0]
+    t.join()
+
+    devices = []
+    for p in t.results:
+        # print(f"{p.psrc, p.hwsrc}")
+        devices.append({'ip': p.psrc, 'mac': p.hwsrc})
+
+    print(f"Gefunden: {len(devices)} IPv4 Devices", flush=True)
+    return devices
+
+def scan_network2(network_range):
     arp_request = ARP(pdst=network_range)
     ether = Ether(dst="ff:ff:ff:ff:ff:ff")
     packet = ether / arp_request
@@ -48,11 +64,29 @@ def send_icmpv6_multicast(iface):
 
 
 if __name__ == "__main__":
+    print("IPv4 Interfaces *****************************")
+    for iface in netifaces.interfaces():
+        addrs = netifaces.ifaddresses(iface)
+        for addr in addrs.get(netifaces.AF_INET, []):
+            print('%-8s %s' % ( iface, addr['addr']))
+
+    print("IPv6 Interfaces *****************************")
+    for iface in netifaces.interfaces():
+        addrs = netifaces.ifaddresses(iface)
+        for addr in addrs.get(netifaces.AF_INET6, []):
+            print('%-8s %s' % (iface, addr['addr']))
+    print("Welches Interface soll gescannt werden? ", end="")
+ #   interface = input()
+ #   if interface == "":
+ #       interface = "enp0s1"
+
     conf.use_pcap = True
     interface = conf.iface
+   # interface = "Ethernet"
     print(f"Start scanning {interface}..................", flush=True)
     # Netzwerkrange, die gescannt werden soll, z.B. "192.168.0.0/24"
-    network_range = "192.168.0.0/24"
+    #network_range = "192.168.0.0/24"
+    network_range = "10.192.0.0/19"
     devices = scan_network(network_range)
 
     # Netzwerk-Interface, über das das Paket gesendet wird
